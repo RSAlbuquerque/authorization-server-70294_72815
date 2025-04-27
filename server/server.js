@@ -19,9 +19,34 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+const basicAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader || !authHeader.startsWith("Basic ")) {
+    res.setHeader("WWW-Authenticate", 'Basic realm="Protected"');
+    return res.status(401).send("Authentication required.");
+  }
+
+  const base64Credentials = authHeader.split(" ")[1];
+  const credentials = Buffer.from(base64Credentials, "base64").toString(
+    "ascii"
+  );
+  const [username, password] = credentials.split(":");
+
+  const adminUsername = process.env.ADMIN_ID;
+  const adminPassword = process.env.ADMIN_SECRET;
+
+  if (username === adminUsername && password === adminPassword) {
+    return next();
+  }
+
+  res.setHeader("WWW-Authenticate", 'Basic realm="Protected"');
+  return res.status(401).send("Invalid credentials.");
+};
+
 // Pages
 // Homepage
-app.get("/", (req, res) => {
+app.get("/", basicAuth, (req, res) => {
   res.send(`
       <h2>Register New User</h2>
       <form method="POST" action="/register-user">
@@ -41,7 +66,7 @@ app.get("/", (req, res) => {
 });
 
 // Login Form
-app.get("/login", (req, res) => {
+app.get("/login", basicAuth, (req, res) => {
   const { client_id, redirect_uri, response_type } = req.query;
   res.send(`
     <h2>Login</h2>
@@ -64,7 +89,7 @@ app.get("/login", (req, res) => {
 
 // Handlers
 // Add User
-app.post("/register-user", async (req, res) => {
+app.post("/register-user", basicAuth, async (req, res) => {
   const { username, password } = req.body;
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -112,7 +137,7 @@ app.post("/register-client", (req, res) => {
 
 // Authorization
 app.get("/authorize", (req, res) => {
-  const { client_id, redirect_uri, response_type } = req.query;
+  const { response_type, redirect_uri, state, client_id } = req.query;
 
   const client = db
     .prepare("SELECT * FROM clients WHERE client_id = ?")
@@ -134,18 +159,19 @@ app.get("/authorize", (req, res) => {
     res.send(`
       <h2>Login</h2>
       <form method="POST" action="/login">
+      <input type="hidden" name="response_type" value="${escapeHtml(
+        response_type || ""
+      )}" />
+      <input type="hidden" name="redirect_uri" value="${escapeHtml(
+        redirect_uri || ""
+      )}" />
+      <input type="hidden" name="state" value="${escapeHtml(state || "")}" />
       <input type="hidden" name="client_id" value="${escapeHtml(
         client_id || ""
-      )}" />
-        <input type="hidden" name="redirect_uri" value="${escapeHtml(
-          redirect_uri || ""
-        )}" />
-        <input type="hidden" name="response_type" value="${escapeHtml(
-          response_type || ""
-        )}" />
-        <label>Username: <input name="username" /></label><br/>
-        <label>Password: <input type="password" name="password" /></label><br/>
-        <button type="submit">Login</button>
+      )}" />  
+      <label>Username: <input name="username" /></label><br/>
+      <label>Password: <input type="password" name="password" /></label><br/>
+      <button type="submit">Login</button>
       </form>
     `);
   }
@@ -203,7 +229,7 @@ app.post("/token", (req, res) => {
 
 // Login
 app.post("/login", async (req, res) => {
-  const { username, password, client_id, redirect_uri, response_type } =
+  const { username, password, client_id, redirect_uri, response_type, state } =
     req.body;
   const user = db
     .prepare("SELECT * FROM users WHERE username = ?")
@@ -227,6 +253,7 @@ app.post("/login", async (req, res) => {
 
   const redirectUrl = new URL(redirect_uri);
   redirectUrl.searchParams.append("code", escapeHtml(code));
+  redirectUrl.searchParams.append("state", escapeHtml(state));
 
   res.redirect(redirectUrl.toString());
 });

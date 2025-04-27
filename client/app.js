@@ -29,12 +29,12 @@ const strategy = new OAuth2Strategy(
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: process.env.CALLBACK_URL,
-    state: false,
+    state: false, // TODO: Figure out this
     customHeaders: {
       Authorization:
         "Basic " +
         Buffer.from(
-          `${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`
+          `${process.env.ADMIN_ID}:${process.env.ADMIN_SECRET}`
         ).toString("base64"),
     },
   },
