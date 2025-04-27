@@ -184,6 +184,7 @@ app.post("/token", (req, res) => {
       username: authCode.username,
       client: client_id,
       authorized: process.env.SERVER_NAME,
+      serverurl: process.env.SERVER_URL,
       jti: uuidv4(),
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 600,

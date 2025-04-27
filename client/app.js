@@ -77,6 +77,7 @@ app.get("/profile", (req, res) => {
   let username;
   let client;
   let authorized;
+  let serverUrl;
   let jti;
   let iat;
   let exp;
@@ -86,6 +87,7 @@ app.get("/profile", (req, res) => {
     username = decoded.username;
     client = decoded.client;
     authorized = decoded.authorized;
+    serverUrl = decoded.serverurl;
     jti = decoded.jti;
     iat = decoded.iat;
     exp = decoded.exp;
@@ -107,7 +109,8 @@ app.get("/profile", (req, res) => {
     <h2>Decoded JWT:</h2>
     <p><strong>Username:</strong> ${escapeHtml(username)}</p>
     <p><strong>Client:</strong> ${escapeHtml(client)}</p>
-    <p><strong>Authorized:</strong> ${escapeHtml(authorized)}</p>
+    <p><strong>Authorized by:</strong> ${escapeHtml(authorized)}</p>
+    <p><strong>Auth Server URL:</strong> ${escapeHtml(serverUrl)}</p>
     <p><strong>JTI:</strong> ${escapeHtml(jti)}</p>
     <p><strong>Issued At:</strong> ${escapeHtml(
       new Date(iat * 1000).toLocaleString()
@@ -150,5 +153,5 @@ app.get("/login-failed", (req, res) => {
 
 // Start client
 app.listen(process.env.CLIENT_PORT, () => {
-  console.log(`Authorization server running at ${process.env.CLIENT_URL}`);
+  console.log(`Client running at ${process.env.CLIENT_URL}`);
 });
