@@ -65,15 +65,18 @@ Click on the 'Login with OAuth2' link. If the authorization server is running lo
 
 👤 Available Logins (username | password):
 
-- TBA | TBA
-- TBA | TBA
-- TBA | TBA
+- user-1 | user1pwd
+- user-2 | user2pwd
+- user-3 | user3pwd
 
-🛡️ Available Clients (client_id | client_secret | redirect_uri)
+🛡️ Available Clients (client_id | client_secret)
 
-- TBA | TBA | TBA
-- TBA | TBA | TBA
-- TBA | TBA | TBA
+- client-1 | client1sec
+- client-2 | client2sec
+- client-3 | client3sec
+
+For all of them, redirect uri is:
+http://localhost:3000/auth/provider/callback
 
 After successfully loging in, you will see the profile page with information about the user logged in and the JWT token.
 
