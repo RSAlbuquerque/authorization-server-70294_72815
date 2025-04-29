@@ -1,5 +1,8 @@
 # 🚀 Setup Guide
 
+# Server Link
+https://auth-server-deploy-70294-72815.onrender.com/
+
 ## 1. 📦 Install dependencies
 
 ```bash
@@ -69,13 +72,13 @@ Click on the 'Login with OAuth2' link. If the authorization server is running lo
 - user-2 | user2pwd
 - user-3 | user3pwd
 
-🛡️ Available Clients (client_id | client_secret)
+🛡️ Available Clients (clientId | clientSecret)
 
 - client-1 | client1sec
 - client-2 | client2sec
 - client-3 | client3sec
 
-For all of them, redirect uri is:
+For all of them, callbackURL is:
 http://localhost:3000/auth/provider/callback
 
 After successfully loging in, you will see the profile page with information about the user logged in and the JWT token.
