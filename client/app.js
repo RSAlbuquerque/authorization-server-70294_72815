@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 const escapeHtml = require("escape-html");
 
 const app = express();
-app.set("trust proxy", 1); // HTTPS only
+//app.set("trust proxy", 1); // HTTPS only
 
 // Session middleware
 app.use(
@@ -16,15 +16,15 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      sameSite: "none", // none in HTTPS | lax in HTTP
-      secure: true, // true in HTTPS | false in HTTP
+      sameSite: "lax", // none in HTTPS | lax in HTTP
+      secure: false, // true in HTTPS | false in HTTP
       httpOnly: true,
     },
   })
 );
 
 // Debug middleware
-/*app.use((req, res, next) => {
+app.use((req, res, next) => {
   console.log("\n--- REQUEST START ---");
   console.log(`Path: ${req.path}`);
   console.log(`Session ID: ${req.sessionID}`);
@@ -34,7 +34,7 @@ app.use(
     `Is Authenticated: ${req.isAuthenticated ? req.isAuthenticated() : "N/A"}`
   );
   next();
-});*/
+});
 
 // Initialize Passport
 app.use(passport.initialize());

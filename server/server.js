@@ -8,7 +8,7 @@ const escapeHtml = require("escape-html");
 const { v4: uuidv4 } = require("uuid");
 
 const app = express();
-app.set("trust proxy", 1); // HTTPS only
+//app.set("trust proxy", 1); // HTTPS only
 
 // Session middleware
 app.use(
@@ -17,8 +17,8 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      sameSite: "none", // none in HTTPS | lax in HTTP
-      secure: true, // true in HTTPS | false in HTTP
+      sameSite: "lax", // none in HTTPS | lax in HTTP
+      secure: false, // true in HTTPS | false in HTTP
       httpOnly: true,
     },
   })
