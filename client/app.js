@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const escapeHtml = require("escape-html");
 
 const app = express();
+app.set("trust proxy", 1); // HTTPS only
 
 // Session middleware
 app.use(
@@ -14,8 +15,26 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
+    cookie: {
+      sameSite: "none", // none in HTTPS | lax in HTTP
+      secure: true, // true in HTTPS | false in HTTP
+      httpOnly: true,
+    },
   })
 );
+
+// Debug middleware
+/*app.use((req, res, next) => {
+  console.log("\n--- REQUEST START ---");
+  console.log(`Path: ${req.path}`);
+  console.log(`Session ID: ${req.sessionID}`);
+  console.log(`Session Data:`, req.session);
+  console.log(`Cookies:`, req.headers.cookie);
+  console.log(
+    `Is Authenticated: ${req.isAuthenticated ? req.isAuthenticated() : "N/A"}`
+  );
+  next();
+});*/
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -29,7 +48,7 @@ const strategy = new OAuth2Strategy(
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: process.env.CALLBACK_URL,
-    state: false, // TODO: Figure out this
+    state: false, // Should be true, but didn't manage to make it work
     customHeaders: {
       Authorization:
         "Basic " +
@@ -56,7 +75,9 @@ app.get("/", (req, res) => {
 });
 
 // Start OAuth2 login
-app.get("/auth/provider", passport.authenticate("oauth2"));
+app.get("/auth/provider", (req, res, next) => {
+  passport.authenticate("oauth2", { scope: ["profile"] })(req, res, next);
+});
 
 // OAuth2 callback
 app.get(
